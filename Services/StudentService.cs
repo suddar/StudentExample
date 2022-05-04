@@ -17,7 +17,7 @@ namespace StudentExample.Services
 
         }
 
-        public bool AddStudent(Student student)
+        public Student? AddStudent(Student student)
         {
             try
             {
@@ -25,11 +25,11 @@ namespace StudentExample.Services
                 student.Id = GenId();
                 studentlist.Add(student);
                 //azureService.UploadData();
-                return true;
+                return student;
             }
             catch (Exception)
             {
-                return false;
+                return null;
             }
         }
 
