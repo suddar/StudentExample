@@ -18,7 +18,6 @@ namespace StudentExample.Controllers
             this.studentService = studentService;
         }
 
-
         [HttpGet]
         public ActionResult Get()
         {

@@ -1,75 +1,58 @@
-﻿//using Azure.Storage.Blobs;
-//using Azure.Storage.Blobs.Models;
-//using Newtonsoft.Json;
-//using System.Text;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Newtonsoft.Json;
+using System.Text;
 
-//namespace StudentExample.Services
-//{
-//    public class AzureService
-//    {
-//        // requires using Microsoft.Extensions.Configuration;
-//        private readonly IConfiguration Configuration;
+namespace StudentExample.Services
+{
+    public class AzureService : IAzureService
+    {
+        // requires using Microsoft.Extensions.Configuration;
+        private readonly IConfiguration configuration;
 
-//        // Blob service client 
-//        private BlobServiceClient blobServiceClient;
+        private BlobServiceClient blobServiceClient;
+        private BlobContainerClient container;
 
-//        // Blob container client
-//        private BlobContainerClient container;
+        public AzureService(IConfiguration configuration)
+        {
+            this.configuration = configuration;
 
-//        // Container name
-//        private string ContainerName;
+            blobServiceClient = new BlobServiceClient(configuration["ConnectionString"]);
+            container = blobServiceClient.GetBlobContainerClient(configuration["ContainerName"]);
+        }
 
-//        private void AzureService(Configuration configuration)
-//        {
+        public T GetBlobData<T>(string blobName)
+        {
+            var blob = container.GetBlobClient(blobName);
+            using (Stream s = blob.OpenRead())
+            {
+                using (StreamReader sr = new StreamReader(s, Encoding.UTF8))
+                {
+                    using (JsonReader reader = new JsonTextReader(sr))
+                    {
+                        JsonSerializer serializer = new JsonSerializer();
+                        return serializer.Deserialize<T>(reader);
+                    }
+                }
+            }
+        }
 
-//            // Create BlobServiceClient from the connection string.
-//            blobServiceClient = new BlobServiceClient(Configuration["ConnectionString"]);
+        public int UploadData(string jsonContent, string blobName)
+        {
+            BlobClient blob = container.GetBlobClient(blobName);
 
-//            // Get and create the container for the blobs
-//            container = blobServiceClient.GetBlobContainerClient(Configuration["ContainerName"]);
-//        }
+            var result = blob.Upload(new MemoryStream(Encoding.UTF8.GetBytes(jsonContent)),
+                new BlobHttpHeaders() { ContentType = "application/json" });
 
-//        // Uploading Json Text
-//        public async Task<Entity> UploadEntityToBlobAsync<Entity>(BlobClient blobJson)
-// where Entity : class, new()
-//        {
-//            {
-//            string jsonEntityContent = JsonConvert.SerializeObject(student);
+            return result.GetRawResponse().Status;
+        }
 
-//            BlobClient blob = container.GetBlobClient(ContainerName);
-//            await blob.UploadAsync(new MemoryStream(Encoding.UTF8.GetBytes(jsonEntityContent)),
-//                new BlobHttpHeaders()
-//                {
-//                    ContentType = "application/json"
-//                });
-//        }
-
-//        BlobClient blobJson = container.GetBlobClient("BlobName");
-//        Entity jsonEntity = await GetEntityBlobAsync<Entity>(blobJson);
-
-//        public async Task<Entity> GetEntityBlobAsync<Entity>(BlobClient blobJson)
-//         where Entity : class, new()
-//        {
-//            try
-//            {
-//                using (MemoryStream s = new MemoryStream())
-//                {
-//                    await blobJson.DownloadToAsync(s);
-//                    using (StreamReader sr = new StreamReader(s, Encoding.UTF8))
-//                    {
-//                        using (JsonReader reader = new JsonTextReader(sr))
-//                        {
-//                            JsonSerializer serializer = new JsonSerializer();
-//                            var serializer.Deserialize<Entity>(reader);
-//                        }
-//                    }
-//                }
-//            }
-//            catch (RequestFailedException ex)
-//                when (ex.ErrorCode == BlobErrorCode.BlobNotFound)
-//            {
-//                return null;
-//            }
-//        }
-//    }
-//}
+        public IEnumerable<BlobClient> GetAllBlobs()
+        {
+            foreach (BlobItem blob in container.GetBlobs(BlobTraits.None, BlobStates.None, string.Empty))
+            {
+                yield return container.GetBlobClient(blob.Name);
+            }
+        }
+    }
+}
