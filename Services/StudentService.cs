@@ -1,81 +1,68 @@
 ﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Newtonsoft.Json;
 using StudentExample.Entities;
+using System.Text;
 
 namespace StudentExample.Services
 {
     public class StudentService : IStudentService
     {
-        // requires using Microsoft.Extensions.Configuration;
-        private readonly IConfiguration Configuration;
+        private List<Student> studentlist = new List<Student>();
 
-
-        // Blob service client 
-        private BlobServiceClient blobServiceClient;
-
-        // Blob container client
-        private BlobContainerClient container;
-
-        // Container name
-        private string ContainerName;
-
-        public StudentService(IConfiguration Configuration)
+        public StudentService()
         {
-            this.Configuration = Configuration;
 
-            // Azure Storage init
-            AzureStorageBlobInit();
+            Student student = new Student();
+            student.Name = "Mai Thi Hoa";
+            student.Address = "Ha noi";
+            studentlist.Add(student);
+
+            student = new Student();
+            student.Name = "Nguyen Van Nam";
+            student.Address = "Ho chi minh";
+            studentlist.Add(student);
         }
 
         public bool AddStudent(Student student)
         {
-            return new();
+            try
+            {
+                studentlist.Add(student);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
         public Student GetStudent(int id)
         {
-            return new Student();
+            return studentlist[id];
         }
 
         public List<Student> GetStudents()
         {
-            return new List<Student>();
-        }
-
-        public bool RemoveStudent(int id)
-        {
-            return true;
+            return studentlist;
         }
 
         public Student UpdateStudent(int id, Student student)
         {
-            return student;
+            return studentlist[id] = student;
         }
 
-        #region Azure Storage Blob
-
-        private void AzureStorageBlobInit()
+        public bool RemoveStudent(int id)
         {
-            // Create BlobServiceClient from the connection string.
-            blobServiceClient = new BlobServiceClient(Configuration["ConnectionString"]);
-
-            // Get and create the container for the blobs
-            container = blobServiceClient.GetBlobContainerClient(Configuration["ContainerName"]);
+            try
+            {
+                studentlist.RemoveAt(id);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
-
-        // Uploading Json Text
-        private async Task UploadStudentToBlob()
-        {
-            string jsonEntityContent = "{ }";
-
-            BlobClient blob = container.GetBlobClient("BlobName");
-            await blob.UploadAsync(new MemoryStream(Encoding.UTF8.GetBytes(jsonEntityContent)),
-                    new BlobHttpHeaders()
-                    {
-                        ContentType = "application/json"
-                    });
-        }
-        #endregion
-
     }
-
 }

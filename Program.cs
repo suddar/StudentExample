@@ -10,9 +10,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// register Student service
+// register services
 builder.Services.AddScoped<IStudentService, StudentService>();
-//builder.Services.Configure<StudentService>();
 
 var app = builder.Build();
 

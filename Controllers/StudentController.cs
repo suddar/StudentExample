@@ -10,22 +10,12 @@ namespace StudentExample.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        List<Student> studentlist = new List<Student>();
+
         private readonly IStudentService studentService;
 
         public StudentController(IStudentService studentService)
         {
             this.studentService = studentService;
-
-            Student student = new Student();
-            student.Name = "Mai Thi Hoa";
-            student.Address = "Ha noi";
-            studentlist.Add(student);
-
-            student = new Student();
-            student.Name = "Nguyen Van Nam";
-            student.Address = "Ho chi minh";
-            studentlist.Add(student);
         }
 
 
@@ -34,7 +24,7 @@ namespace StudentExample.Controllers
         {
             try
             {
-                return Ok(studentlist);
+                return Ok(studentService.GetStudents());
             }
             catch (Exception)
             {
@@ -49,7 +39,7 @@ namespace StudentExample.Controllers
         {
             try
             {
-                var result = studentlist[id];
+                var result = studentService.GetStudent(id);
 
                 if (result == null) return NotFound();
 
@@ -71,7 +61,7 @@ namespace StudentExample.Controllers
                 if (student == null)
                     return BadRequest();
 
-                studentlist.Add(student);
+                studentService.AddStudent(student);
 
                 return CreatedAtAction(nameof(Student), new { id = student.Id });
             }
@@ -91,7 +81,7 @@ namespace StudentExample.Controllers
                 if (id != student.Id)
                     return BadRequest("Student ID mismatch");
 
-                var studentToUpdate = studentlist[id];
+                var studentToUpdate = studentService.UpdateStudent(id, student);
 
                 if (studentToUpdate == null)
                     return NotFound($"Student with Id = {id} not found");
@@ -111,7 +101,7 @@ namespace StudentExample.Controllers
         {
             try
             {
-                var studentToRemove = studentlist[id];
+                var studentToRemove = studentService.RemoveStudent(id);
 
                 if (studentToRemove == null)
                 {
