@@ -6,8 +6,8 @@ namespace StudentExample.Services
     {
         List<Student> GetStudents();
         bool AddStudent(Student student);
-        Student getStudent(int id);
-        bool UpdateStudent(int id, Student student);
+        Student GetStudent(int id);
+        Student UpdateStudent(int id, Student student);
         bool RemoveStudent(int id);
 
     }

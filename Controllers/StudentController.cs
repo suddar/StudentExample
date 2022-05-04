@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StudentExample.Entities;
+using StudentExample.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -10,9 +11,12 @@ namespace StudentExample.Controllers
     public class StudentController : ControllerBase
     {
         List<Student> studentlist = new List<Student>();
+        private readonly IStudentService studentService;
 
-        public StudentController()
+        public StudentController(IStudentService studentService)
         {
+            this.studentService = studentService;
+
             Student student = new Student();
             student.Name = "Mai Thi Hoa";
             student.Address = "Ha noi";
@@ -21,6 +25,7 @@ namespace StudentExample.Controllers
             student = new Student();
             student.Name = "Nguyen Van Nam";
             student.Address = "Ho chi minh";
+            studentlist.Add(student);
         }
 
 
@@ -79,7 +84,6 @@ namespace StudentExample.Controllers
 
         // PUT api/<StudentController>/5
         [HttpPut("{id}")]
-        [HttpPut("{id:int}")]
         public ActionResult<Student> UpdateStudent(int id, Student student)
         {
             try
