@@ -8,12 +8,27 @@ namespace StudentExample.Services
 {
     public class StudentService : IStudentService
     {
-        private IAzureService azureService;
+        //private IAzureService azureService;
         private List<Student> studentlist = new();
 
-        public StudentService(IAzureService azureService)
+        public StudentService()
         {
-            this.azureService = azureService;
+            //this.azureService = azureService;
+            var student = new Student();
+            studentlist.Add(student);
+            student.Id=studentlist.Count+1;
+
+            student = new Student();
+            studentlist.Add(student);
+            student.Id = studentlist.Count + 1;
+
+            student = new Student();
+            studentlist.Add(student);
+            student.Id = studentlist.Count + 1;
+
+            student = new Student();
+            studentlist.Add(student);
+            student.Id = studentlist.Count + 1;
         }
 
         public bool AddStudent(Student student)
@@ -38,7 +53,7 @@ namespace StudentExample.Services
             return result == null ? 1 : result.Id + 1;
         }
 
-        public Student GetStudent(int id)
+        public Student? GetStudent(int id)
         {
             var student = studentlist.FirstOrDefault(student => student.Id == id);
             return student;
@@ -49,16 +64,33 @@ namespace StudentExample.Services
             return studentlist;
         }
 
-        public Student UpdateStudent(int id, Student student)
+        public Student? UpdateStudent(int id, Student student)
         {
-            return studentlist[id] = student;
+            try
+            {
+                // find student by id
+                var validStudent = studentlist.FirstOrDefault(x => x.Id == id);
+
+                if (validStudent != null)
+                {
+                    validStudent.Date = student.Date;
+                    validStudent.CreateTime = student.CreateTime;
+                    validStudent.Address = student.Address;
+                    return validStudent;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
         }
 
         public bool RemoveStudent(int id)
         {
             try
             {
-                studentlist.RemoveAt(id);
                 var item = studentlist.SingleOrDefault(x => x.Id == id);
                 if (item != null)
                 {

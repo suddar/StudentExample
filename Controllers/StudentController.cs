@@ -83,10 +83,7 @@ namespace StudentExample.Controllers
 
                 var studentToUpdate = studentService.UpdateStudent(id, student);
 
-                if (studentToUpdate == null)
-                    return NotFound($"Student with Id = {id} not found");
-
-                return Ok(studentToUpdate);
+                return studentToUpdate != null ? Ok(studentToUpdate) : NotFound($"Student with Id = {id} not found");
             }
             catch (Exception)
             {
@@ -103,12 +100,7 @@ namespace StudentExample.Controllers
             {
                 var studentToRemove = studentService.RemoveStudent(id);
 
-                if (studentToRemove == null)
-                {
-                    return NotFound($"Student with Id = {id} not found");
-                }
-
-                return Ok();
+                return studentToRemove == true ? Ok() : NotFound($"Student with Id = {id} not found");
             }
             catch (Exception)
             {
