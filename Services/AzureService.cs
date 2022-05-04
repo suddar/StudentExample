@@ -1,4 +1,5 @@
 ﻿//using Azure.Storage.Blobs;
+//using Azure.Storage.Blobs.Models;
 //using Newtonsoft.Json;
 //using System.Text;
 
@@ -29,8 +30,10 @@
 //        }
 
 //        // Uploading Json Text
-//        private async Task UploadStudentData(Student student)
+//        public async Task<Entity> UploadEntityToBlobAsync<Entity>(BlobClient blobJson)
+// where Entity : class, new()
 //        {
+//            {
 //            string jsonEntityContent = JsonConvert.SerializeObject(student);
 
 //            BlobClient blob = container.GetBlobClient(ContainerName);

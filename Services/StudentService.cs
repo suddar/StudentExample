@@ -8,27 +8,22 @@ namespace StudentExample.Services
 {
     public class StudentService : IStudentService
     {
-        private List<Student> studentlist = new List<Student>();
+        private IAzureService azureService;
+        private List<Student> studentlist = new();
 
-        public StudentService()
+        public StudentService(IAzureService azureService)
         {
-
-            Student student = new Student();
-            student.Name = "Mai Thi Hoa";
-            student.Address = "Ha noi";
-            studentlist.Add(student);
-
-            student = new Student();
-            student.Name = "Nguyen Van Nam";
-            student.Address = "Ho chi minh";
-            studentlist.Add(student);
+            this.azureService = azureService;
         }
 
         public bool AddStudent(Student student)
         {
             try
             {
+
+                student.Id = GenId();
                 studentlist.Add(student);
+                //azureService.UploadData();
                 return true;
             }
             catch (Exception)
@@ -37,9 +32,16 @@ namespace StudentExample.Services
             }
         }
 
+        private int GenId()
+        {
+            var result = studentlist.OrderByDescending(student => student.Id).FirstOrDefault();
+            return result == null ? 1 : result.Id + 1;
+        }
+
         public Student GetStudent(int id)
         {
-            return studentlist[id];
+            var student = studentlist.FirstOrDefault(student => student.Id == id);
+            return student;
         }
 
         public List<Student> GetStudents()
@@ -57,7 +59,13 @@ namespace StudentExample.Services
             try
             {
                 studentlist.RemoveAt(id);
-                return true;
+                var item = studentlist.SingleOrDefault(x => x.Id == id);
+                if (item != null)
+                {
+                    studentlist.Remove(item);
+                    return true;
+                }
+                else return false;
             }
             catch (Exception)
             {
