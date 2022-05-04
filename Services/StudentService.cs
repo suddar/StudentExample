@@ -14,21 +14,7 @@ namespace StudentExample.Services
         public StudentService()
         {
             //this.azureService = azureService;
-            var student = new Student();
-            studentlist.Add(student);
-            student.Id=studentlist.Count+1;
 
-            student = new Student();
-            studentlist.Add(student);
-            student.Id = studentlist.Count + 1;
-
-            student = new Student();
-            studentlist.Add(student);
-            student.Id = studentlist.Count + 1;
-
-            student = new Student();
-            studentlist.Add(student);
-            student.Id = studentlist.Count + 1;
         }
 
         public bool AddStudent(Student student)
