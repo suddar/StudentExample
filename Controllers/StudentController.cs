@@ -16,9 +16,11 @@ namespace StudentExample.Controllers
             Student student = new Student();
             student.Name = "Mai Thi Hoa";
             student.Address = "Ha noi";
-
             studentlist.Add(student);
-            studentlist.Add(new());
+
+            student = new Student();
+            student.Name = "Nguyen Van Nam";
+            student.Address = "Ho chi minh";
         }
 
 
@@ -38,7 +40,7 @@ namespace StudentExample.Controllers
 
         // get student by id
         [HttpGet("{id}")]
-        public ActionResult<Student> GetEmployee(int id)
+        public ActionResult<Student> GetStudent(int id)
         {
             try
             {
@@ -57,19 +59,46 @@ namespace StudentExample.Controllers
 
         // POST a student
         [HttpPost]
-        public IActionResult Post([FromBody] Student value)
+        public ActionResult<Student> CreateStudent(Student student)
         {
-            studentlist.Add(value);
+            try
+            {
+                if (student == null)
+                    return BadRequest();
 
-            return Ok(value);
+                studentlist.Add(student);
+
+                return CreatedAtAction(nameof(Student), new { id = student.Id });
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error creating new student");
+            }
         }
 
         // PUT api/<StudentController>/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Student value)
+        [HttpPut("{id:int}")]
+        public ActionResult<Student> UpdateStudent(int id, Student student)
         {
-            studentlist[id] = value;
-            return Ok(studentlist[id]);
+            try
+            {
+                if (id != student.Id)
+                    return BadRequest("Student ID mismatch");
+
+                var studentToUpdate = studentlist[id];
+
+                if (studentToUpdate == null)
+                    return NotFound($"Student with Id = {id} not found");
+
+                return Ok(studentToUpdate);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error updating data");
+            }
         }
 
         // DELETE api/<StudentController>/5
