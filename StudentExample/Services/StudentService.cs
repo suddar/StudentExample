@@ -1,8 +1,5 @@
-﻿using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using StudentExample.Entities;
-using System.Text;
 
 namespace StudentExample.Services
 {
@@ -26,7 +23,7 @@ namespace StudentExample.Services
 
         public List<Student> GetStudents()
         {
-            if(studentsList == null) return null;
+            if (studentsList == null) return null;
             return studentsList;
         }
 
@@ -40,12 +37,9 @@ namespace StudentExample.Services
         {
             try
             {
+                student.CreateTime = DateTime.Now;
                 student.Id = GenId();
                 studentsList.Add(student);
-
-                //up load data to a blob
-                var resultCode = azureService.UploadData(JsonConvert.SerializeObject(studentsList), blobName);
-                if (resultCode == 201) return null;
 
                 return student;
             }
@@ -65,8 +59,8 @@ namespace StudentExample.Services
 
                 if (validStudent != null)
                 {
+                    validStudent.Name = student.Name;
                     validStudent.Date = student.Date;
-                    validStudent.CreateTime = student.CreateTime;
                     validStudent.Address = student.Address;
                     return validStudent;
                 }
@@ -83,7 +77,7 @@ namespace StudentExample.Services
         {
             try
             {
-                var item = studentsList.SingleOrDefault(x => x.Id == id);
+                var item = studentsList.FirstOrDefault(x => x.Id == id);
                 if (item != null)
                 {
                     studentsList.Remove(item);
@@ -100,7 +94,8 @@ namespace StudentExample.Services
         #region private methods
         private List<Student> RetrieveStudentsFromAzureStorage(string blobName)
         {
-            return azureService.GetBlobData<List<Student>>(blobName);
+            var ret = azureService.GetBlobData<List<Student>>(blobName);
+            return ret;
         }
 
         private int GenId()
@@ -112,8 +107,6 @@ namespace StudentExample.Services
         public void Dispose()
         {
             azureService.UploadData(JsonConvert.SerializeObject(studentsList), blobName);
-            // Dispose of unmanaged resources.
-            //Dispose();
 
             // Suppress finalization.
             GC.SuppressFinalize(this);

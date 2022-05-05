@@ -1,4 +1,7 @@
 
+using Quartz;
+using Quartz.Impl;
+using StudentExample.Jobs;
 using StudentExample.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,8 +14,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // register services
-builder.Services.AddScoped<IStudentService, StudentService>();
-builder.Services.AddScoped<IAzureService, AzureService>();
+builder.Services.AddSingleton<IStudentService, StudentService>();
+builder.Services.AddSingleton<IAzureService, AzureService>();
 
 var app = builder.Build();
 
@@ -28,5 +31,19 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+StdSchedulerFactory factory = new StdSchedulerFactory();
+IScheduler scheduler = await factory.GetScheduler();
+IJobDetail job = JobBuilder.Create<StudentIncremental>()
+    .WithIdentity("job1", "group1")
+    .Build();
+ITrigger trigger = TriggerBuilder.Create()
+	.WithIdentity("trigger1", "group1")
+	.StartNow()
+	.WithSimpleSchedule(x => x
+		.WithIntervalInMinutes(5)
+		.RepeatForever())
+	.Build();
+await scheduler.Start();
 
 app.Run();

@@ -2,11 +2,7 @@
 using Moq;
 using StudentExample.Entities;
 using StudentExample.Services;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace StudentExample.UnitTest.Services
@@ -14,12 +10,14 @@ namespace StudentExample.UnitTest.Services
     public class StudentServicesTest
     {
         [Fact]
-        public void GetStudents()
+        public void GivenStudents_WhenGetAll_ThenReturnOK()
         {
             // Arrange
             var mockIAzureService = new Mock<IAzureService>();
             mockIAzureService.Setup(repo => repo.UploadData(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(It.IsAny<int>());
+            mockIAzureService.Setup(repo => repo.GetBlobData<List<Student>>(It.IsAny<string>()))
+           .Returns(new List<Student>() { new Student { Id = 1 }, new Student { Id = 2 } });
 
             var appsettings = new Dictionary<string, string> {
                 {"ConnectionString", "ConnectionStringValues"},
@@ -32,18 +30,22 @@ namespace StudentExample.UnitTest.Services
 
             // Act
             var studentService = new StudentService(mockIAzureService.Object, mockConfiguration);
-            studentService.GetStudents();
+            var expect = studentService.GetStudents();
 
             // Assert
+            Assert.Equal(expect.Count, 2);
+            Assert.Equal(expect[0].Id, 1);
         }
 
         [Fact]
-        public void AddStudent()
+        public void GivenNewStudent_WhenAdd_ThenReturnAddedStudent()
         {
             // Arrange
             var mockIAzureService = new Mock<IAzureService>();
             mockIAzureService.Setup(repo => repo.UploadData(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(It.IsAny<int>());
+            mockIAzureService.Setup(repo => repo.GetBlobData<List<Student>>(It.IsAny<string>()))
+              .Returns(new List<Student>());
 
             var appsettings = new Dictionary<string, string> {
                 {"ConnectionString", "ConnectionStringValues"},
@@ -55,16 +57,22 @@ namespace StudentExample.UnitTest.Services
                 .Build();
 
             // Act
+            var newStudent = new Student();
+            newStudent.Name = "test";
             var studentService = new StudentService(mockIAzureService.Object, mockConfiguration);
-            studentService.AddStudent(It.IsAny<Student>());
+            var expect = studentService.AddStudent(newStudent);
+            Assert.Equal(expect.Id, 1);
+            Assert.Equal(expect.Name, newStudent.Name);
         }
 
         [Fact]
-        public void GetStudent()
+        public void GivenStudents_WhenGetDetail_ThenReturnOK()
         {
             // Arrange
             var mockIAzureService = new Mock<IAzureService>();
             mockIAzureService.Setup(repo => repo.GetBlobData<List<Student>>(It.IsAny<string>())).Returns(It.IsAny<List<Student>>());
+            mockIAzureService.Setup(repo => repo.GetBlobData<List<Student>>(It.IsAny<string>()))
+         .Returns(new List<Student>() { new Student { Id = 1 }, new Student { Id = 2 } });
 
             var appsettings = new Dictionary<string, string> {
                 {"ConnectionString", "ConnectionStringValues"},
@@ -77,16 +85,19 @@ namespace StudentExample.UnitTest.Services
 
             // Act
             var studentService = new StudentService(mockIAzureService.Object, mockConfiguration);
-            studentService.GetStudent(It.IsAny<int>());
+         var expect =   studentService.GetStudent(1);
+            Assert.Equal(expect.Id, 1);
         }
 
         [Fact]
-        public void UpdateStudent()
+        public void GivenStudents_WhenUpdate_ThenReturnOK()
         {
             // Arrange
             var mockIAzureService = new Mock<IAzureService>();
             mockIAzureService.Setup(repo => repo.UploadData(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(It.IsAny<int>());
+            mockIAzureService.Setup(repo => repo.GetBlobData<List<Student>>(It.IsAny<string>()))
+        .Returns(new List<Student>() { new Student { Id = 1 }, new Student { Id = 2 } });
 
             var appsettings = new Dictionary<string, string> {
                 {"ConnectionString", "ConnectionStringValues"},
@@ -99,16 +110,19 @@ namespace StudentExample.UnitTest.Services
 
             // Act
             var studentService = new StudentService(mockIAzureService.Object, configuration);
-            studentService.UpdateStudent(It.IsAny<int>(), It.IsAny<Student>());
+            var expect =  studentService.UpdateStudent(1, new Student { Id=1,Name="test"});
+            Assert.Equal(expect.Name, "test");
         }
 
         [Fact]
-        public void RemoveStudent()
+        public void GivenStudents_WhenRemove_ThenReturnOK()
         {
             // Arrange
             var mockIAzureService = new Mock<IAzureService>();
             mockIAzureService.Setup(repo => repo.UploadData(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(It.IsAny<int>());
+            mockIAzureService.Setup(repo => repo.GetBlobData<List<Student>>(It.IsAny<string>()))
+       .Returns(new List<Student>() { new Student { Id = 1 }, new Student { Id = 2 } });
 
             var appsettings = new Dictionary<string, string> {
                 {"ConnectionString", "ConnectionStringValues"},
@@ -122,7 +136,8 @@ namespace StudentExample.UnitTest.Services
             // Act
             var studentService = new StudentService(mockIAzureService.Object, configuration);
             studentService.AddStudent(It.IsAny<Student>());
-            studentService.RemoveStudent(It.IsAny<int>());
+            var expect = studentService.RemoveStudent(2);
+            Assert.Equal(expect, true);
         }
     }
 }

@@ -12,19 +12,27 @@ namespace StudentExample.Services
 
         private BlobServiceClient blobServiceClient;
         private BlobContainerClient container;
+        BlobClient blob;
+
 
         public AzureService(IConfiguration configuration)
         {
             this.configuration = configuration;
 
+            _ = InitClient();
+        }
+        private async         Task InitClient()
+        {
+            //blobServiceClient = new BlobServiceClient("DefaultEndpointsProtocol=https;AccountName=southeastasiastorage001;AccountKey=6TVjUp2lo17CdQco+pCG6tUvH8uPDlK/Zi8srsBvwxyJ9NZFnm8OnNqGkvX93DX0/fRPrSjJhqWA+AStPsWTag==;EndpointSuffix=core.windows.net");
+            //container = blobServiceClient.GetBlobContainerClient("student");
+            //blob = container.GetBlobClient("student-demo-1");// truyen text gi thi no tao ra blob nhu the
             blobServiceClient = new BlobServiceClient(configuration["ConnectionString"]);
             container = blobServiceClient.GetBlobContainerClient(configuration["ContainerName"]);
+            blob = container.GetBlobClient(configuration["BlobName"]);
         }
 
         public T GetBlobData<T>(string blobName)
         {
-            BlobClient blob = container.GetBlobClient(blobName);
-
             using (Stream s = blob.OpenRead())
             {
                 using (StreamReader sr = new StreamReader(s, Encoding.UTF8))
@@ -40,7 +48,6 @@ namespace StudentExample.Services
 
         public int qUploadData(string jsonContent, string blobName)
         {
-            BlobClient blob = container.GetBlobClient(blobName);
 
             var result = blob.Upload(new MemoryStream(Encoding.UTF8.GetBytes(jsonContent)),
                     new BlobHttpHeaders() { ContentType = "application/json" });
@@ -50,7 +57,6 @@ namespace StudentExample.Services
 
         public int UploadData(string jsonContent, string blobName)
         {
-            BlobClient blob = container.GetBlobClient(blobName);
 
             var result = blob.Upload(new MemoryStream(Encoding.UTF8.GetBytes(jsonContent)),
                 new BlobHttpHeaders() { ContentType = "application/json" });

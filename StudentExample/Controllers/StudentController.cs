@@ -62,7 +62,7 @@ namespace StudentExample.Controllers
 
                 var createdStudent = studentService.AddStudent(student);
 
-                return Ok();
+                return Ok(createdStudent);
             }
             catch (Exception)
             {
