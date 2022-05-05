@@ -6,34 +6,40 @@ using System.Text;
 
 namespace StudentExample.Services
 {
-    public class StudentService : IStudentService
+    public class StudentService : IStudentService, IDisposable
     {
         private IAzureService azureService;
-        private string blobName = string.Empty;
-        private IConfiguration configuration;
-        private List<Student> studentList;
+        private List<Student> studentsList;
+        private string blobName;
 
-        public StudentService(IAzureService azureService, IConfiguration configuration)
+        public StudentService(IAzureService azureService)
         {
             this.azureService = azureService;
-            this.configuration = configuration;
-            blobName = configuration["BlobName"];
+            blobName = "student-test";
+
+            // get students data from azure blob storage
+            studentsList = RetrieveStudentsFromAzureStorage("student-test");
         }
 
-        public Student? AddStudent(Student student)
+        public List<Student> GetStudents()
+        {
+            return studentsList;
+        }
+
+        public Student? GetStudent(int id)
+        {
+            return studentsList.FirstOrDefault(student => student.Id == id);
+        }
+
+        public Student AddStudent(Student student)
         {
             try
             {
-                // get students data from azure blob storage
-                var studentlist = RetrieveStudentListFromAzureStorage(blobName);
-                if (studentlist == null) return null;
-
-                // 
                 student.Id = GenId();
-                studentlist?.Add(student);
+                studentsList.Add(student);
 
-                // up load data to a blob
-                var resultCode = azureService.UploadData(JsonConvert.SerializeObject(studentlist), blobName);
+                //up load data to a blob
+                var resultCode = azureService.UploadData(JsonConvert.SerializeObject(studentsList), blobName);
                 if (resultCode == 201) return null;
 
                 return student;
@@ -42,33 +48,15 @@ namespace StudentExample.Services
             {
                 return null;
             }
-        }
-
-        public Student? GetStudent(int id)
-        {
-            // get students data from azure blob storage
-            studentList = RetrieveStudentListFromAzureStorage(blobName);
-            if (studentList == null) return null;
-
-            var student = studentList.FirstOrDefault(student => student.Id == id);
             return student;
-        }
-
-        public List<Student> GetStudents()
-        {
-            return studentList;
         }
 
         public Student? UpdateStudent(int id, Student student)
         {
             try
             {
-                // get students data from azure blob storage
-                studentList = RetrieveStudentListFromAzureStorage(blobName);
-                if (studentList == null) return null;
-
                 // find student by id
-                var validStudent = studentList.FirstOrDefault(x => x.Id == id);
+                var validStudent = studentsList.FirstOrDefault(x => x.Id == id);
 
                 if (validStudent != null)
                 {
@@ -90,14 +78,10 @@ namespace StudentExample.Services
         {
             try
             {
-                // get students data from azure blob storage
-                studentList = RetrieveStudentListFromAzureStorage(blobName);
-                if (studentList == null) return false;
-
-                var item = studentList.SingleOrDefault(x => x.Id == id);
+                var item = studentsList.SingleOrDefault(x => x.Id == id);
                 if (item != null)
                 {
-                    studentList.Remove(item);
+                    studentsList.Remove(item);
                     return true;
                 }
                 else return false;
@@ -109,15 +93,25 @@ namespace StudentExample.Services
         }
 
         #region private methods
-        private List<Student> RetrieveStudentListFromAzureStorage(string blobName)
+        private List<Student> RetrieveStudentsFromAzureStorage(string blobName)
         {
             return azureService.GetBlobData<List<Student>>(blobName);
         }
 
         private int GenId()
         {
-            var result = studentList.OrderByDescending(student => student.Id).FirstOrDefault();
+            var result = studentsList.OrderByDescending(student => student.Id).FirstOrDefault();
             return result == null ? 1 : result.Id + 1;
+        }
+
+        public void Dispose()
+        {
+            azureService.UploadData(JsonConvert.SerializeObject(studentsList), blobName);
+            // Dispose of unmanaged resources.
+            //Dispose();
+
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

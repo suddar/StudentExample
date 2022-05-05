@@ -11,10 +11,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // register services
-builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddSingleton<IStudentService, StudentService>();
 builder.Services.AddScoped<IAzureService, AzureService>();
-
-// AzureClients config
 
 var app = builder.Build();
 

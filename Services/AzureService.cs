@@ -23,7 +23,8 @@ namespace StudentExample.Services
 
         public T GetBlobData<T>(string blobName)
         {
-            var blob = container.GetBlobClient(blobName);
+            BlobClient blob = container.GetBlobClient(blobName);
+
             using (Stream s = blob.OpenRead())
             {
                 using (StreamReader sr = new StreamReader(s, Encoding.UTF8))
@@ -35,6 +36,16 @@ namespace StudentExample.Services
                     }
                 }
             }
+        }
+
+        public int qUploadData(string jsonContent, string blobName)
+        {
+            BlobClient blob = container.GetBlobClient(blobName);
+
+            var result = blob.Upload(new MemoryStream(Encoding.UTF8.GetBytes(jsonContent)),
+                    new BlobHttpHeaders() { ContentType = "application/json" });
+
+            return result.GetRawResponse().Status;
         }
 
         public int UploadData(string jsonContent, string blobName)
