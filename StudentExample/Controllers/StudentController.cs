@@ -62,7 +62,7 @@ namespace StudentExample.Controllers
 
                 var createdStudent = studentService.AddStudent(student);
 
-                return CreatedAtAction(nameof(Student), new { id = createdStudent.Id });
+                return Ok();
             }
             catch (Exception)
             {
