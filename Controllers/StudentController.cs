@@ -60,10 +60,9 @@ namespace StudentExample.Controllers
                 if (student == null)
                     return BadRequest();
 
-                var createdStuden = studentService.AddStudent(student);
+                var createdStudent = studentService.AddStudent(student);
 
-                //return CreatedAtAction(nameof(Student), new { id = student.Id });
-                return Ok();
+                return CreatedAtAction(nameof(Student), new { id = createdStudent.Id });
             }
             catch (Exception)
             {

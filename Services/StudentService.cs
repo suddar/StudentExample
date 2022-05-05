@@ -10,12 +10,15 @@ namespace StudentExample.Services
     {
         private IAzureService azureService;
         private List<Student> studentsList;
+        private readonly IConfiguration configuration;
+
         private string blobName;
 
-        public StudentService(IAzureService azureService)
+        public StudentService(IAzureService azureService, IConfiguration configuration)
         {
             this.azureService = azureService;
-            blobName = "student-test";
+            this.configuration = configuration;
+            blobName = configuration["BlobName"];
 
             // get students data from azure blob storage
             studentsList = RetrieveStudentsFromAzureStorage("student-test");
@@ -23,11 +26,13 @@ namespace StudentExample.Services
 
         public List<Student> GetStudents()
         {
+            if(studentsList == null) return null;
             return studentsList;
         }
 
         public Student? GetStudent(int id)
         {
+            if (studentsList == null) return null;
             return studentsList.FirstOrDefault(student => student.Id == id);
         }
 
