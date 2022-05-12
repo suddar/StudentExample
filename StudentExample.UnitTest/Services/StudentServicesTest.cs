@@ -57,7 +57,7 @@ namespace StudentExample.UnitTest.Services
                 .Build();
 
             // Act
-            var newStudent = new Student();
+            var newStudent = new Student();//a2
             newStudent.Name = "test";
             var studentService = new StudentService(mockIAzureService.Object, mockConfiguration);
             var expect = studentService.AddStudent(newStudent);
