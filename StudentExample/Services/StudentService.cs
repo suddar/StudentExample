@@ -35,60 +35,38 @@ namespace StudentExample.Services
 
         public Student AddStudent(Student student)
         {
-            try
-            {
-                student.CreateTime = DateTime.Now;
-                student.Id = GenId();
-                studentsList.Add(student);
+            if (student == null) return null;
 
-                return student;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            student.CreateTime = DateTime.Now;
+            student.Id = GenId();
+            studentsList.Add(student);
+
             return student;
         }
 
         public Student? UpdateStudent(int id, Student student)
         {
-            try
-            {
-                // find student by id
-                var validStudent = studentsList.FirstOrDefault(x => x.Id == id);
+            if (student == null || studentsList == null) return null;
 
-                if (validStudent != null)
-                {
-                    validStudent.Name = student.Name;
-                    validStudent.Date = student.Date;
-                    validStudent.Address = student.Address;
-                    return validStudent;
-                }
-                return null;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            // find student by id
+            var validStudent = studentsList.FirstOrDefault(x => x.Id == id);
+            validStudent.Name = student.Name;
+            validStudent.Date = student.Date;
+            validStudent.Address = student.Address;
+            return validStudent;
 
         }
 
         public bool RemoveStudent(int id)
         {
-            try
-            {
-                var item = studentsList.FirstOrDefault(x => x.Id == id);
-                if (item != null)
-                {
-                    studentsList.Remove(item);
-                    return true;
-                }
-                else return false;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            if (studentsList == null) return false;
+
+            var item = studentsList.FirstOrDefault(x => x.Id == id);
+            if (item == null) return false;
+
+            studentsList.Remove(item);
+            return true;
+
         }
 
         #region private methods
