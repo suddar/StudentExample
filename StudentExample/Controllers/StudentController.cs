@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StudentExample.Entities;
+using StudentExample.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -9,27 +10,20 @@ namespace StudentExample.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        List<Student> studentlist = new List<Student>();
 
-        public StudentController()
+        private readonly IStudentService studentService;
+
+        public StudentController(IStudentService studentService)
         {
-            Student student = new Student();
-            student.Name = "Mai Thi Hoa";
-            student.Address = "Ha noi";
-            studentlist.Add(student);
-
-            student = new Student();
-            student.Name = "Nguyen Van Nam";
-            student.Address = "Ho chi minh";
+            this.studentService = studentService;
         }
-
 
         [HttpGet]
         public ActionResult Get()
         {
             try
             {
-                return Ok(studentlist);
+                return Ok(studentService.GetStudents());
             }
             catch (Exception)
             {
@@ -44,7 +38,7 @@ namespace StudentExample.Controllers
         {
             try
             {
-                var result = studentlist[id];
+                var result = studentService.GetStudent(id);
 
                 if (result == null) return NotFound();
 
@@ -66,9 +60,9 @@ namespace StudentExample.Controllers
                 if (student == null)
                     return BadRequest();
 
-                studentlist.Add(student);
+                var createdStudent = studentService.AddStudent(student);
 
-                return CreatedAtAction(nameof(Student), new { id = student.Id });
+                return Ok(createdStudent);
             }
             catch (Exception)
             {
@@ -79,7 +73,6 @@ namespace StudentExample.Controllers
 
         // PUT api/<StudentController>/5
         [HttpPut("{id}")]
-        [HttpPut("{id:int}")]
         public ActionResult<Student> UpdateStudent(int id, Student student)
         {
             try
@@ -87,12 +80,9 @@ namespace StudentExample.Controllers
                 if (id != student.Id)
                     return BadRequest("Student ID mismatch");
 
-                var studentToUpdate = studentlist[id];
+                var studentToUpdate = studentService.UpdateStudent(id, student);
 
-                if (studentToUpdate == null)
-                    return NotFound($"Student with Id = {id} not found");
-
-                return Ok(studentToUpdate);
+                return studentToUpdate != null ? Ok(studentToUpdate) : NotFound($"Student with Id = {id} not found");
             }
             catch (Exception)
             {
@@ -107,14 +97,9 @@ namespace StudentExample.Controllers
         {
             try
             {
-                var studentToRemove = studentlist[id];
+                var studentToRemove = studentService.RemoveStudent(id);
 
-                if (studentToRemove == null)
-                {
-                    return NotFound($"Student with Id = {id} not found");
-                }
-
-                return Ok();
+                return studentToRemove == true ? Ok() : NotFound($"Student with Id = {id} not found");
             }
             catch (Exception)
             {
